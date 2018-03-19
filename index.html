@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>cuttlefish</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>kombucha</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11775,13 +11775,8 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h6>Cuttlefish Denovo Assembly Workflow</h6><p>We were presented with approximately 60G of data files from a cuttlefish sequence. This was not the egg. The goal 
-is to generate a reference sequence</p><p><img src="c1.png"></p>
-<p>A sample read looks like: 
-<img src="c2.png"></p>
-<p>This file is different from the SRR data which you download using the sra toolkit. A sample read from this reference
-genome looks like. Note there is no 8 nucleotide sequence at the end of the @ line.:
-<img src="c3.png"></p>
+<p><h6>kombucha metagenomic analysis</h6>
+<a href="https://play.google.com/store/books/details/O_Reilly_Media_Inc_BioCoder_8?id=FqwwCgAAQBAJ">https://play.google.com/store/books/details/O_Reilly_Media_Inc_BioCoder_8?id=FqwwCgAAQBAJ</a></p>
 
 </div>
 </div>
@@ -11790,129 +11785,80 @@ genome looks like. Note there is no 8 nucleotide sequence at the end of the @ li
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Illumina Background</h6>
-Source:<a href="http://nextgen.mgh.harvard.edu/IlluminaChemistry.html">http://nextgen.mgh.harvard.edu/IlluminaChemistry.html</a></p>
-<p>The cuttlefish read files are denoted by FileName.R1 and FileName.R2. Both of those files
-are matched as paired reads where FileName=Undetermined_S0_L00X_001. The first step described as starting library
-matches the Biocurious Library Prep class where we used the Nextera DNA Flex Library prep kit. There was a sample
-sheet in the lab which described the adapters as we were adding them. Reading a single strand in one direction 
-gives us reads in the R1 file and reading the same strand in the reverse direcion as the strand is bent down into an 
-upside U and reversed gives us the R2 read. The lines in each file should be correlated to the same DNA half strand.</p>
-<p><img src="i1.png">
-<img src="i2.png">
-<img src="i3.png"></p>
+<p><h6>MG-RAST follows 2 workflows, we are doing the lower and simpler RNA workflow </h6>
+<img src="workflow.png">
+The following is from file pipeline.xml</p>
+<p></p>
+<h6>Step 1 RNA stage 50</h6>
+Input:This is the original submitted sequence file.
+This is a sequence file in either fasta or fastq format. 
+It may have been edited to change all end-of-line characters into UNIX format.
+Output: 100.preprocess.passed. Leave 100.preprocess.removed for QC. 
+<h6>Step 2 RNA stage 100</h6>
+Input:The input sequence data for this step is in the original uploaded sequence data.
+Depending on the options chosen, the preprocessing step filters sequences based on length, number of ambiguous bases and quality values if available.
+Output:The FASTA formatted file 100.preprocess.passed.fna contains the sequences which were accepted and will be passed on to the next stage of the analysis pipeline.
+Output:The FASTA formatted file 100.preprocess.removed.fna contains the sequences which were rejected and will not be passed on to the next stage of the analysis pipeline.
+<h6>Step 3 RNA stage 425</h6>
+The input sequence data for this step is in the file 100.preprocess.passed.fna.
+Sequences are pre-screened using qiime-uclust for at least 70% identity to ribosomal sequences 
+from the following RNA databases (Greengenes, LSU, SSU, and RDP).
+The FASTA formatted file 425.search.rna.fna contains the predicted ribosomal sequences.
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Paired Reads</h6>
-From the above image flattening out the inverted u we get a sequence of 2 reads. The inverted u
-is the flow cell reversing the reads. The first read is before step 6 and the second read is
-after step 7. 
-<img src="pr.png">
-The filename_R1 and filename_R2 files represent these 2 reads. It does not matter trying to find out which one is forward and 
-which one is reverse, both reads are reverse complements of each other. 
-e.g. TTCAG&lt;-&gt;CTGAA</p>
+<h6>Step 4 RNA stage 440 </h6>
+    <input>The input sequence data for this step is in the file 425.search.rna.fna.</input>
+    <description>Sequences are clustered at 97% identity using cd-hit. The clustering process does not remove any sequences but instead makes the similarity search step easier. Following the search, the original reads are loaded into MG-RAST for retrieval on-demand.</description>
+    <output><file>The FASTA formatted file 440.cluster.rna97.fna contains sequence clusters that have at least 70% identity to ribosomal sequences and have sequences within 97% identity.</file></output>
+    <output>
+      <file>The tab-delimited file 440.cluster.rna97.mapping identifies the sequence clusters and the sequences which describe them, each line describes a single cluster.</file>
+      <column>Representative sequence ID, including hit location and strand, e.g. 11954908_1_121_+</column>
+      <column>List of IDs, including hit location and strand, for other sequences in the cluster, e.g. 11898451_1_119_+,11944918_19_121_+</column>
+      <column>List of percentage identities to the representative read sequence, e.g. 97.5%,100.0%</column>
+    </output>
+<h6>Step 4 RNA stage 450 </h6>
+<input>The input sequence data for this step is in the file 440.cluster.rna97.fna.</input>
+   Some of the annotated (.expand) files contain index numbers for md5s and annotations. Mapping files for these numbers can be found 
+    a href='ftp://ftp.metagenomics.anl.gov/data/M5nr/annotations'
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Cause of bad reads</h6>
-There are many causes of bad reads. 
-A single nucleotide error from a reference genome can be from 
-1)sequencer error,<br/> 
-2) getting a copy from 1 chromosome and a copy from another 
-chromosome, both of those nucleotides in a certain position may not agree and you get some
-variation. <br/></p>
-<p><p></p>
-There are other types of non single nucleotide bad reads such as adapters joining together
-and different types of sequencer errors. Low quality scores are considered errors. 
-<img src="badreads.png">
-<img src="readerror1.png">
-    &lt;img src = "readerror2.png"&gt;
-    &lt;img src = "readerror3.png"&gt;
-    &lt;img src = "fastqformat.png"&gt;</p>
+      The similarity output from BLAT against the RNA databases (Greengenes, LSU, SSU, and RDP) is the file 
+        450.rna.sims in BLAST m8 format. This includes the identifier for the query which is either the FASTA 
+        id or the cluster ID,
+        and the internal identifier for the sequence that it hits.
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h6>Checking the data -- Do not write programs</h6>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Running FastQC</h6>
-What is a universal adapter? 
-<a href="https://www.biostars.org/p/4798/">https://www.biostars.org/p/4798/</a></p>
-<p><p></p>
-Run over all the data with a bash script. Don't type in commands because you can't explain to someone what you
-did if there is a problem. Make your own log system.</p>
-<p><img src="cuttlefishfastqc1.png">
-<img src="cuttlefishfastqc2.png"></p>
+      <column>Query id (either fasta ID or cluster ID), e.g. 11847922</column>
+      <column>Hit id, e.g. 501336051b4d5d412fb84afe8b7fdd87</column>
+      <column>percentage identity, e.g. 100.00</column>
+      <column>alignment length, e.g. 107</column>
+      <column>number of mismatches, e.g. 0</column>
+      <column>number of gap openings, e.g. 0</column>
+      <column>q.start, e.g. 1</column>
+      <column>q.end, e.g. 107</column>
+      <column>s.start, e.g. 1262</column>
+      <column>s.end, e.g. 1156</column>
+      <column>e-value, e.g. 1.7e-54</column>
+      <column>score in bits, e.g. 210.0</column>
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Tried 3 cleaning tools, AfterQC, trimmomatic, BBMap</h6>
-Which one is better and why?</p>
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>AfterQC</h6>
-The advantage of using AfterQC is it automatically selects the parameters for you. Since I have no experience in this
-field I tried this as a first step and tried to examine the changes in the data after running a simple form of cleaning.</p>
-<p><img src="afterqc1.png">
-<img src="afterqc2.png">
-<img src="afterqcoutput.png">
-Note the parameters for trim_front and trim_tail are different. One is 15/0 the other 15/7. This step can also be 
-done with trimmomatic but I don't understand how the sliding window works and how it is better.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Removing Adapters/Barcodes with BBMap</h6>
-The barcodes are added under file BBMap/resources/adapters.fa. This is a comprehensive list of the Illumina adapters.</p>
-
+<p></p>
+<p></p>
+http://qiime.org/scripts/pick_otus.html
+<p></p>
+<h6>Next gen MGRAST</h6>
+Code is available in github. 
+<img src="block.png">
+<p></p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Below</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">comparison</span> <span class="n">of</span> <span class="n">BBMap</span> <span class="n">vs</span><span class="o">.</span> <span class="n">Trimmomatic</span><span class="o">.</span> <span class="n">Trimmomatic</span> <span class="n">on</span> <span class="n">left</span><span class="p">,</span> <span class="n">BBMap</span> <span class="n">on</span> <span class="n">right</span><span class="o">.</span> <span class="n">Adapter</span> <span class="n">content</span>
-<span class="n">like</span> <span class="n">original</span> <span class="n">after</span> <span class="n">trimmomatic</span><span class="o">.</span> <span class="n">no</span> <span class="n">difference</span><span class="o">.</span> 
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#39;L007R2_orig.png&#39;&gt;&lt;/td&gt;&lt;td&gt;&lt;img src=&#39;L007R2_afterqc.png&#39;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">PATH</span><span class="o">=</span><span class="s2">&quot;/patrik_biome_data&quot;</span>
+<span class="n">kombucha_datafiles</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">&quot;patrik_biome_data&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;num data files:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kombucha_datafiles</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -11928,61 +11874,10 @@ The barcodes are added under file BBMap/resources/adapters.fa. This is a compreh
 <div class="prompt"></div>
 
 
-
-<div class="output_html rendered_html output_subarea ">
-<table><tr><td><img src='L007R2_orig.png'></td><td><img src='L007R2_afterqc.png'></td></tr></table>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>num data files: 10
+</pre>
 </div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Trimmomatic</h6>
-Better on quality scores, they don't include the indexes so adapters not trimmed
-worse on the adapter removal than AfterQC
-<img src="trimmomatic1.png">
-<img src="trimmomatic2.png">
-The problem with trimmomatic is the index adapters are not in the file!!! 
-<img src="trim_output.png"></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#original on left, trimmomatic on right. Much better!!! Trimmomatic not run on original dataset. Run </span>
-<span class="c1">#after BBMAP? verfify. forgot. bbmap-&gt;trimmomatic-&gt;fastqc</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#39;L007R1_orig.png&#39;&gt;&lt;/td&gt;&lt;td&gt;&lt;img src=&#39; L007R1_trimmomatic.png&#39;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-
-<div class="output_html rendered_html output_subarea ">
-<table><tr><td><img src='L007R1_orig.png'></td><td><img src=' L007R1_trimmomatic.png'></td></tr></table>
-</div>
-
 </div>
 
 </div>
@@ -11994,9 +11889,47 @@ The problem with trimmomatic is the index adapters are not in the file!!!
 <div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#orig on left, trimmomatic trim of adapters based on included Nexterra adapters. No indexes!!!!! </span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span>
-<span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#39;L007R1_adapter_orig.png&#39;&gt;&lt;/td&gt;&lt;td&gt;&lt;img src=&#39;L007R1_adapter_trimmomatic.png&#39;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">onlyNucleotides</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>    
+    <span class="n">diff_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;ATCG&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff_set</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">get_adapters</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    from string which starts with @, find the primers at the end</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">kmer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns position of s. Is this supposed to be 0 index?</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">kmer</span><span class="p">)):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">kmer</span><span class="p">)]</span><span class="o">==</span><span class="n">kmer</span><span class="p">):</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pos</span>
+<span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">processLine</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;patrik_biome_data/24694/ssr_24694__R1__L001.fastq&#39;</span><span class="p">):</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">num</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">processLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;@&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;header from fastq file:&quot;</span><span class="p">,</span><span class="n">processLine</span><span class="p">)</span>
+            <span class="n">adapters</span> <span class="o">=</span> <span class="n">get_adapters</span><span class="p">(</span><span class="n">processLine</span><span class="p">)</span>
+            <span class="n">num</span> <span class="o">+=</span><span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;adapters:&quot;</span><span class="p">,</span><span class="n">adapters</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">onlyNucleotides</span><span class="p">(</span><span class="n">processLine</span><span class="p">)):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1">#print(processLine)</span>
+            <span class="c1">#test if begnining /end have adapters</span>
+    
+<span class="c1">#from inspection test for CTTGAG at end of string.</span>
+<span class="c1">#this is not an adapter? </span>
+
+<span class="c1">#from inspection test for CTGTG at beginning or 1 hamming dist away?</span>
+<span class="c1">#every string begins w/CT; this cant be right. Or has GCCAGC in start, not at 0. </span>
+<span class="c1">#GCCAGCAGC vs. GCCAGC. Longer is less probable. </span>
 </pre></div>
 
 </div>
@@ -12012,11 +11945,29 @@ The problem with trimmomatic is the index adapters are not in the file!!!
 <div class="prompt"></div>
 
 
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>header from fastq file: @NS500457:68:H3YFWAFXX:1:11101:2470:1082 1:N:0:TACATGC+GAGTGTT
 
-<div class="output_html rendered_html output_subarea ">
-<table><tr><td><img src='L007R1_adapter_orig.png'></td><td><img src='L007R1_adapter_trimmomatic.png'></td></tr></table>
+adapters: TACATGC+GAGTGTT
+
+header from fastq file: @NS500457:68:H3YFWAFXX:1:11101:9967:1092 1:N:0:TACATGC+GAGTGTT
+
+adapters: TACATGC+GAGTGTT
+
+header from fastq file: @NS500457:68:H3YFWAFXX:1:11101:21148:1122 1:N:0:TACATGC+GAGTGTT
+
+adapters: TACATGC+GAGTGTT
+
+header from fastq file: @NS500457:68:H3YFWAFXX:1:11101:14736:1122 1:N:0:TACATGC+AAGTGTT
+
+adapters: TACATGC+AAGTGTT
+
+header from fastq file: @NS500457:68:H3YFWAFXX:1:11101:17675:1126 1:N:0:TACATGC+GAGTGTT
+
+adapters: TACATGC+GAGTGTT
+
+</pre>
 </div>
-
 </div>
 
 </div>
@@ -12028,8 +11979,8 @@ The problem with trimmomatic is the index adapters are not in the file!!!
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">biorxiv</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">early</span><span class="o">/</span><span class="mi">2018</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span><span class="o">/</span><span class="mi">274100</span>
-<span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">OpenGene</span><span class="o">/</span><span class="n">fastp</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">The</span> <span class="n">adapters</span> <span class="n">are</span>  <span class="n">are</span> <span class="n">used</span> <span class="n">to</span> <span class="n">create</span> <span class="n">longer</span> <span class="n">DNA</span> <span class="n">strands</span> <span class="nb">all</span> <span class="n">of</span> <span class="n">the</span> <span class="n">same</span> <span class="n">size</span> <span class="ow">and</span> <span class="n">to</span> <span class="n">allow</span> <span class="n">paired</span> <span class="n">reads</span><span class="o">.</span> 
+<span class="o">&lt;</span><span class="n">img</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;adapters.png&quot;</span><span class="o">&gt;</span>
 </pre></div>
 
 </div>
@@ -12037,53 +11988,31 @@ The problem with trimmomatic is the index adapters are not in the file!!!
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Removing overrepresented sequences from paired files</h6>
-<a href="https://www.biostars.org/p/279450/">https://www.biostars.org/p/279450/</a>
-Use cutadapt</p>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;ssr_24694__R2__L001.fastq&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+</pre></div>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Abyss testing the bloom filter fill rate</h6>
-<img src="bloom1.png"></p>
 
-</div>
-</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">&lt;</span><span class="n">h6</span><span class="o">&gt;</span><span class="n">How</span> <span class="n">Assemblers</span> <span class="n">Work</span><span class="o">&lt;/</span><span class="n">h6</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">img</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;debruin1.png&quot;</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">christinaboucher</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">files</span><span class="o">/</span><span class="mi">1614</span><span class="o">/</span><span class="mi">2137</span><span class="o">/</span><span class="mi">9671</span><span class="o">/</span><span class="n">deBruijn</span><span class="o">.</span><span class="n">pdf</span><span class="o">&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="n">T</span><span class="o">.</span> <span class="n">C</span><span class="o">.</span> <span class="n">Conway</span> <span class="ow">and</span> <span class="n">A</span><span class="o">.</span> <span class="n">J</span><span class="o">.</span> <span class="n">Bromage</span><span class="o">.</span> <span class="n">Succinct</span> <span class="n">data</span> <span class="n">structures</span> <span class="k">for</span> <span class="n">assembling</span> <span class="n">large</span>
-<span class="n">genomes</span><span class="o">.</span> <span class="n">Bioinformatics</span><span class="p">,</span> <span class="mi">27</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span><span class="mi">479486</span><span class="p">,</span> <span class="mf">2011.</span><span class="o">&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="n">R</span><span class="o">.</span> <span class="n">Chikhi</span> <span class="ow">and</span> <span class="n">G</span><span class="o">.</span> <span class="n">Rizk</span><span class="o">.</span> <span class="n">Space</span><span class="o">-</span><span class="n">efficient</span> <span class="ow">and</span> <span class="n">exact</span> <span class="n">de</span> <span class="n">Bruijn</span> <span class="n">graph</span> <span class="n">representation</span>
-<span class="n">based</span> <span class="n">on</span> <span class="n">a</span> <span class="n">Bloom</span> <span class="nb">filter</span><span class="o">.</span> <span class="n">Algorithm</span><span class="o">.</span> <span class="n">Mol</span><span class="o">.</span> <span class="n">Biol</span><span class="o">.</span><span class="p">,</span> <span class="mi">8</span><span class="p">(</span><span class="mi">22</span><span class="p">),</span> <span class="mi">2012</span><span class="o">&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Bowe</span><span class="p">,</span> <span class="n">Onodera</span><span class="p">,</span> <span class="n">Sadakane</span> <span class="ow">and</span> <span class="n">Shibuya</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span> <span class="n">Bowe</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span> <span class="n">Onodera</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span> <span class="n">Sadakane</span><span class="p">,</span> <span class="ow">and</span> <span class="n">T</span><span class="o">.</span> <span class="n">Shibuya</span><span class="o">.</span> <span class="n">Succinct</span> <span class="n">de</span> <span class="n">Bruijn</span> <span class="n">graphs</span><span class="o">.</span>
-<span class="n">In</span> <span class="n">Proc</span><span class="o">.</span> <span class="n">WABI</span><span class="p">,</span> <span class="n">pages</span> <span class="mi">225</span><span class="err">–</span><span class="mi">235</span><span class="p">,</span> <span class="mf">2012.</span><span class="o">&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">R</span><span class="o">.</span> <span class="n">Chikhi</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span> <span class="n">Limasset</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span> <span class="n">Jackman</span><span class="p">,</span> <span class="n">J</span><span class="o">.</span> <span class="n">Simpson</span><span class="p">,</span> <span class="ow">and</span> <span class="n">P</span><span class="o">.</span> <span class="n">Medvedev</span><span class="o">.</span> <span class="n">On</span> <span class="n">the</span>
-<span class="n">representation</span> <span class="n">of</span> <span class="n">de</span> <span class="n">Bruijn</span> <span class="n">graphs</span><span class="o">.</span> <span class="n">In</span> <span class="n">Proc</span><span class="o">.</span> <span class="n">RECOMB</span><span class="p">,</span> <span class="n">pages</span> <span class="mi">35</span><span class="err">–</span><span class="mi">55</span><span class="p">,</span> <span class="mf">2014.</span><span class="o">&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-<span class="n">The</span> <span class="n">above</span> <span class="n">figure</span> <span class="n">represents</span> <span class="n">an</span> <span class="n">Eulerian</span> <span class="n">walk</span><span class="p">;</span> <span class="n">walking</span> <span class="n">the</span> <span class="n">path</span> <span class="n">such</span> <span class="n">that</span> <span class="n">each</span> <span class="n">edge</span> <span class="ow">is</span> <span class="n">only</span> <span class="n">travelled</span> <span class="n">once</span><span class="o">.</span> <span class="n">A</span> <span class="n">vertex</span>
-<span class="n">represents</span> <span class="n">a</span> <span class="n">single</span> <span class="n">kmer</span> <span class="n">of</span> <span class="n">length</span> <span class="n">K</span><span class="o">.</span> <span class="n">Build</span> <span class="n">the</span> <span class="n">graph</span><span class="p">,</span> <span class="n">simplify</span> <span class="n">removing</span> <span class="n">bubbles</span> <span class="ow">and</span>
-<span class="n">subgraphs</span> <span class="n">which</span> <span class="n">fall</span> <span class="n">below</span> <span class="n">a</span> <span class="n">threshold</span><span class="p">,</span> <span class="ow">and</span> <span class="n">perform</span> <span class="n">a</span> <span class="n">walk</span> <span class="n">to</span> <span class="n">produce</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span> <span class="n">length</span> <span class="n">kmer</span> <span class="n">reads</span> <span class="n">producing</span> 
-<span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">contigs</span><span class="o">.</span> <span class="n">Contigs</span> <span class="n">are</span> <span class="n">assembled</span> <span class="n">using</span> <span class="n">overlap</span><span class="o">.</span> <span class="n">The</span> <span class="n">value</span> <span class="n">of</span> <span class="n">K</span> <span class="n">has</span> <span class="n">a</span> <span class="n">direct</span> <span class="n">impact</span> <span class="n">on</span> <span class="n">the</span> <span class="n">quality</span> <span class="n">of</span> <span class="n">the</span> <span class="n">graph</span>
-<span class="n">Too</span> <span class="n">low</span> <span class="n">a</span> <span class="n">K</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">more</span> <span class="n">spurs</span> <span class="ow">and</span> <span class="n">edges</span> <span class="n">which</span> <span class="n">when</span> <span class="n">removed</span> <span class="n">prevent</span> <span class="n">assembly</span><span class="o">.</span> <span class="n">Too</span> <span class="n">high</span> <span class="n">makes</span> <span class="n">the</span> <span class="n">graph</span> <span class="n">sparse</span> <span class="ow">and</span> 
-<span class="n">disconnected</span><span class="o">.</span> <span class="n">SPAdes</span> <span class="n">uses</span> <span class="n">multiple</span> <span class="n">K</span> <span class="n">values</span> <span class="n">when</span> <span class="n">running</span> <span class="n">assembly</span><span class="o">.</span> <span class="n">Abyss</span> <span class="n">uses</span> <span class="n">a</span> <span class="n">distributed</span> <span class="nb">hash</span> <span class="n">table</span> <span class="n">which</span> <span class="n">requres</span> <span class="mi">336</span><span class="n">GB</span>
-<span class="k">for</span> <span class="n">assembling</span> <span class="n">the</span> <span class="n">human</span> <span class="n">genome</span><span class="o">.</span> <span class="n">In</span> <span class="mi">2011</span> <span class="n">Conway</span> <span class="ow">and</span> <span class="n">Bromage</span> <span class="n">used</span> <span class="n">a</span> <span class="n">sparse</span> <span class="n">bitvector</span> <span class="n">using</span> <span class="mi">32</span><span class="n">GB</span><span class="p">,</span> <span class="n">Chikhi</span> <span class="ow">and</span> <span class="n">Rizk</span> <span class="n">used</span> <span class="n">a</span> <span class="n">bloom</span> 
-<span class="nb">filter</span> <span class="n">which</span> <span class="n">took</span> <span class="mf">5.7</span><span class="n">GB</span> <span class="ow">and</span> <span class="n">Bowe</span><span class="p">,</span> <span class="n">Onodera</span><span class="p">,</span> <span class="n">Sadakane</span> <span class="ow">and</span> <span class="n">Shibuya</span> <span class="n">used</span> <span class="n">the</span> <span class="n">Burrows</span> <span class="n">Wheeler</span> <span class="n">transform</span> <span class="n">to</span> <span class="n">derive</span> <span class="n">a</span> <span class="n">data</span> <span class="n">structure</span>
-<span class="n">using</span> <span class="mf">2.5</span><span class="n">GB</span><span class="o">.</span> <span class="n">R</span><span class="o">.</span> <span class="n">Chikhi</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span> <span class="n">Limasset</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span> <span class="n">Jackman</span><span class="p">,</span> <span class="n">J</span><span class="o">.</span> <span class="n">Simpson</span><span class="p">,</span> <span class="ow">and</span> <span class="n">P</span><span class="o">.</span> <span class="n">Medvedev</span> <span class="n">used</span> <span class="n">a</span> <span class="n">FM</span> <span class="n">index</span> <span class="ow">and</span> <span class="n">minimizers</span> <span class="n">to</span> <span class="n">further</span> <span class="n">reduce</span> <span class="n">teh</span> <span class="n">space</span> <span class="n">to</span> <span class="mf">1.5</span><span class="n">GB</span> <span class="k">for</span> <span class="n">tehe</span> <span class="n">NA18507</span> <span class="n">dataset</span><span class="o">.</span> 
-<span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jts</span><span class="o">/</span><span class="n">dbgfm</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;ssr_24694__R1__L002.fastq&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
     
 </pre></div>
 
@@ -12092,128 +12021,194 @@ Use cutadapt</p>
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Overlapping graph Assemblers<h6>
-Source: MIT Courseware</p>
-<p><h6>sga w/fm indexes better performance than SOAPdeonovo(debruijn)</h6>
-Given a set of kmers how to find a substring which includes all the kmers? 
-Concatenate them all together. 
-How to find the shortest common substring? Create an overlap graph and find a path where you use 1 edge only once. 
-This turns out to be a solution to the genome assembly problem. The problem is there are often many paths in the 
-graph and it is NP complete. There is no algorthm for finding the minimum cycle path. Trial and error. 
-<img src="scs1.png">
-SCS algorithm: start withlist of substriings; find lenght of overlap between each striing. 
-The substrings are AAA AAB ABA ABB BAA BAB BBA BBB. The weights from AAA to AAB are 2 because the length of the 
-overlap, AA is 2. Make edges beween all the vertexes which have overlap and label them.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="scs2.png">
-<img src="scs3.png">
-<img src="scs4.png">
-<img src="scs5.png">
-<img src="scs6.png">
-<img src="scs7.png">
-<img src="scs8.png">
-<img src="scs9.png">
-<img src="scs10.png">
-<img src="scs11.png">
-<img src="scs12.png">
-<img src="scs13.png"></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Installing, build SGA</h6>
-conda create -n sga python=3.6<br/>
-<a href="https://github.com/open-source-parsers/jsoncpp">https://github.com/open-source-parsers/jsoncpp</a><br/>
-current jsoncpp installed version is 1.7.4 as part of ubuntu 16.04LTS<br/> 
-Requirement for bamtools is jsoncpp&gt;1.8.0. jsoncpp 1.8.3 gets installed as libjsoncpp.so.2 <br/>
-<a href="https://github.com/pezmaster31/bamtools/wiki/Building-and-installing">https://github.com/pezmaster31/bamtools/wiki/Building-and-installing</a><br/>
-<a href="https://github.com/jts/sga">https://github.com/jts/sga</a><br/>
-bam compile -- cd into src directory and run ./configure<br/>
-<img src="bamtools.png">
-sga tools are in sga/bin not all the binaries are installed under /usr/local<br/>
-<img src="sgainstall.png">
-dc@dc-X10DAi:~$ cat sga.sh</p>
-<h1 id="!/bin/bash-">!/bin/bash <br /><a class="anchor-link" href="#!/bin/bash-">&#182;</a></h1><p>sga index -a ropebwt --no-reverse -t 56 sgastats.fastq<br/>
-sga preqc -t 56 sgastats.fastq &gt; sgastats.preqc<br/>
-sga-preqc-report.py sgastats.preqc sga/src/examples/*.preqc<br/>
-<img src="sgatime.png"></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="cuttlefish_sga.png">
-<img src="sgatime1.png">
-<img src="sgatime2.png">
-<img src="sgatime3.png">
-<img src="sgatime4.png">
-<img src="sgatime5.png">
-<img src="sgatime6.png"></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Building your own assembler</h6>
-<a href="http://nbviewer.jupyter.org/gist/BenLangmead/7237207">http://nbviewer.jupyter.org/gist/BenLangmead/7237207</a></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Velvet error</h6>
-<img src="velveterror1.png"></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><h6>Running Abyss</h6>
-On nontrimmed or adapter removed data
-<img src="abyssnumreads.png"></p>
-
-</div>
-</div>
-</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">&lt;&gt;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;ssr_24694__R2__L002.fastq&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#the format of the fastq file is colon delimited</span>
+<span class="mi">1</span><span class="p">)</span> <span class="n">illumina</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">NS500457</span>
+<span class="mi">2</span><span class="p">)</span> <span class="n">run</span> <span class="nb">id</span><span class="p">:</span> <span class="mi">68</span>
+<span class="mi">3</span><span class="p">)</span> <span class="n">flow</span> <span class="n">cell</span> <span class="nb">id</span><span class="p">:</span> <span class="n">H3YFWAFXX</span>
+<span class="mi">4</span><span class="p">)</span> <span class="n">flow</span> <span class="n">cell</span> <span class="n">lane</span><span class="p">:</span> <span class="mi">1</span>
+<span class="mi">5</span><span class="p">)</span> <span class="n">x</span> <span class="n">coordinate</span><span class="p">:</span> <span class="mi">11101</span>
+<span class="mi">6</span><span class="p">)</span> <span class="n">y</span> <span class="n">coordinate</span><span class="p">:</span> <span class="mi">2470</span>
+<span class="mi">7</span><span class="p">)</span> <span class="n">unknown</span><span class="err">??</span><span class="o">??</span>
+<span class="mi">8</span><span class="p">)</span> <span class="n">member</span> <span class="n">of</span> <span class="n">pair</span><span class="p">,</span> <span class="mi">1</span> <span class="ow">or</span> 2<span class="o">?</span> 
+<span class="mi">9</span><span class="p">)</span> <span class="n">N</span><span class="o">=</span><span class="n">nonfiltered</span> <span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">,</span> <span class="n">we</span> <span class="n">are</span> <span class="n">nonfiltered</span>
+<span class="mi">10</span><span class="p">)</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">no</span> <span class="n">contol</span> <span class="n">bits</span> <span class="n">are</span> <span class="n">on</span> <span class="k">else</span> <span class="n">even</span> <span class="n">number</span>
+<span class="mi">12</span><span class="p">)</span> <span class="n">index</span> <span class="n">sequence</span><span class="o">.</span> <span class="n">there</span> <span class="n">are</span> <span class="mi">2</span> here<span class="o">?</span> 
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The first step is to clean the reads. Run fastqc on the fastq files using the command line or galaxy. MGRAST uses qcstats(verify w source)
+qcstats is not the same as fastqc. The output of the Illumina sequencer produces phred scores which you can
+use to plot the quality of each read in the fastq data file. Set thresholds and remove those reads is one strategy. 
+Also use BBMap to trim the adapters. Unknown if this data contains the adapters. Easiest is to run BBMap on the fastq files
+and see what the size differential is. Can test by doing grep on the adapters. Verify this is corret.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#test if the data we get from SRA contains adapters. It does not! This data is cleaned already or </span>
+<span class="c1">#is from a different sequencer </span>
+<span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;mutant_R1.fastq&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+
+
+
+<span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;mutant_R2.fastq&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>@mutant-no_snps.gff-24960/1
+
+AATGTTGTCACTTGGATTCAAATGACATTTTAAATCTAATTATTCATGAATCGAACTAGTACGAAATGCAATGAGCATCTTGTCTAGTTCGATTTTTTAATGTCTAAAAATGTCGTATATGTAATCAGAGTAGAAAGTGTTGAGGCGTTT
+
++
+
+5??A9?BBBDDDBEDDBFF+FGHHIIHHHEIHIIHIIAHDHIIHIG#IIHIFHHHFGIII*IHHHIHFIIHGICIHHIHFFFHHHIIIIIHIHDHIIIAHHH?GHHHHHF@HGGH6GGHEEGBGGGGGFGFE6FGFEFE?GF5EGGEEAC
+
+@mutant-no_snps.gff-24958/1
+
+@mutant-no_snps.gff-24960/2
+
+TCCATTCATCGGTACAACTGTATTTGGTGGATTATCATTAGCGTTAGGTGCAGCGTTATTAGCTGGACGTCGTCGCGAACTATAAAAACAAACAATACACAACGATAGATATCATTTTATCCAAACCAATTTTAACTTATATACGTTGAT
+
++
+
+????9BBB@DBD@B&lt;DGFFEFAIHFHEH&gt;FIHHHHICIHFIIIIC9H9H8FCCAHHI=DIG?HEHC?I5HEIGEHHFHHIH?=HEIFA/H&lt;HHHHHIIG,HHH-+HHF@FEHGFFHEH*FF;HDHGGHGDHD*GE-E-EFEGD;;G*EG-
+
+@mutant-no_snps.gff-24958/2
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#from the sequences figure out which ones start/end with adapters or some fraction of the adapters</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="mgrast1.png">
+<img src="mgrast2.png">
+<img src="mgrast3.png">
+<img src="mgrast4.png">
+<img src="mgrast5.png">
+<img src="mgrast6.png">
+<img src="mgrast7.png">
+<img src="mgrast8.png">
+<img src="mgrast9.png">
+<img src="mgrast10.png">
+<img src="mgrast11.png">
+<img src="mgrast12.png"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><h6>ubiome Pie charts</h6>
+<img src="patrik_biome_data/patrik1.png">
+<img src="patrik_biome_data/patrik2.png">
+<img src="patrik_biome_data/patrik3.png">
+<img src="patrik_biome_data/patrik4.png">
+<img src="patrik_biome_data/patrik5.png">
+<img src="patrik_biome_data/patrik6.png">
+<img src="patrik_biome_data/patrik7.png">
+<img src="patrik_biome_data/patrik8.png"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="patrik_biome_data/pb_fastqc1.png"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><h6>Assembly</h6>
+Metagenomic sequencing defined as samples from multiple organisms. Shotgun metagenomic sequencing which is more specific 
+generates reports down to the individual organism. The ubiome data/MGRAST interface returns down to the class level. 
+The ubiome results and MGRAST results are different from many complaints on the interent. Unknown if one is really
+more accurate than another. 
+<img src="picharia2.png">
+one measure of quality is the N50 score.</p>
+
+</div>
+</div>
 </div>
     </div>
   </div>
